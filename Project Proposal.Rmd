@@ -1,0 +1,63 @@
+---
+title: "STAT-140-01: Project Proposal"
+author: "Lynn Do"
+output: pdf_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+### **1. What is the topic? (Give a little background if necessary.) Why is it interesting to you?**
+
+I am interested in analyzing the related health and social factors that may relate to life expectancy. I am primarily concerned about identifying key factors that might be associated with increased/decreased health conditions, and even the broader socioeconomic influence on public health. Since I am interested in doing a project related to social good, I hope that in the end, I can derive useful insights to determine areas needing investment to better social well-being. 
+
+### **2. What is in the dataset? What are the cases and variables? If you’re obtaining a pre-existing dataset, describe the source. Show a little bit of the dataset with head() or glimpse().**
+
+This is [the link](https://www.kaggle.com/datasets/kumarajarshi/life-expectancy-who/data) to the dataset. The data was collected from WHO and United Nations website with the help of Deeksha Russell and Duan Wang.
+
+```{r}
+led_dataset <- read_csv('life_expectancy_data.csv', show_col_types = FALSE)
+led_dataset %>%
+  head()
+```
+
+Each case represents data of a country in a specific year from 2000 - 2015. There are 2938 cases and 22 variables. The variables' names are summarized as follows:
+
+```{r}
+led_dataset %>%
+  glimpse()
+```
+
+The variables' description:
+
+1. **Country**: categorical - country name
+2. **Year**: categorical - values from 2000 to 2015
+3. **Status**: categorical - developing/developed
+4. **Life expectancy**: numerical - life expectancy in age
+5. **Adult mortality**: numerical - Probability of dying between 15 and 60 years per 1000 population 
+6. **Infant deaths**: numerical - Number of Infant Deaths per 1000 population 
+7. **Alcohol**: numerical - Alcohol, recorded per capita (15+) consumption (in litres of pure alcohol)
+8. **Percentage expenditure**: numerical - Expenditure on health as a percentage of Gross Domestic Product per capita (%)
+9. **Hepatitis B**: numerical - Hepatitis B (HepB) immunization coverage among 1-year-olds (%)
+10. **Measles**: numerical - Number of reported cases per 1000 population
+11. **BMI**: numerical - Average Body Mass Index of entire population
+12. **Under-five deaths**: numerical - Number of under-five deaths per 1,000 population
+13. **Polio**: Polio (Pol3) immunization coverage among 1-year-olds (%)
+14. **Total expenditure**: numerical - General government expenditure on health as a percentage of total government expenditure (%)
+15. **Diphtheria**: numerical - Diphtheria tetanus toxoid and pertussis (DTP3) immunization coverage among 1-year-olds (%)
+16. **HIV/AIDS**: numerical - Deaths per 1 000 live births HIV/AIDS (0-4 years)
+17. **GDP**: numerical - Gross Domestic Product per capita (in USD)
+18. **Population**: numerical - Population of the country
+19. **Thinness 1-19 years**: numerical - Prevalence of thinness among children and adolescents for Age 10 to 19 (%)
+20. **Thinness 5-9 years**: numerical - Prevalence of thinness among children for Age 5 to 9 (%)
+21. **Income composition of resources**: numerical - Human Development Index in terms of income composition of resources (index ranging from 0 to 1)
+22. **Schooling**: numerical - Number of years of Schooling
+
+### **3. What variables do you think are most interesting? What could you use as the response in a model?**
+
+The response in the model is life expectancy. The predictors could be the expenditure of the government on healthcare, mortality, lifestyle habits (for example, alcohol), development of the country, and schooling. 
+
+### **4. What possible issues or challenges do you anticipate with analyzing the data (or obtaining it, if you’re collecting it yourself)? The more you think about this now, the better. You do not want to run into these unexpected issues at the last minute! **
+
+The year variable is a categorical variable in this context, but R stores this as a numerical variable, so I might need to convert this into categorical. Other than that, missing data on population, Hepatitis B, and GDP, as stated by the compiler of this dataset, might be a big issue when I want to find the distribution of data or do other inference tasks on these factors. Another note is this dataset has a lot of variables, so it might take a bit of time to try out different combinations of variables and discover the underlying patterns/correlations between them.  

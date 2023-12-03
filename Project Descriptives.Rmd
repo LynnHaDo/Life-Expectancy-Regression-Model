@@ -1,0 +1,209 @@
+---
+title: "STAT-140-01: Project Descriptives"
+author: "Lynn Do"
+output: pdf_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+
+### **1. Explore dataset**
+
+```{r}
+led_dataset <- read_csv('life_expectancy_data.csv', show_col_types = FALSE)
+led_dataset %>%
+  head()
+```
+
+Each case represents data of a country in a specific year from 2000 - 2015. There are 2938 cases and 22 variables. The variables' names and their first few values are summarized as follows:
+
+```{r}
+led_dataset %>%
+  glimpse()
+```
+
+The variables' description:
+
+1. **Country**: categorical - country name
+2. **Year**: categorical - values from 2000 to 2015
+3. **Status**: categorical - developing/developed
+4. **Life expectancy**: numerical - life expectancy in age
+5. **Adult mortality**: numerical - Probability of dying between 15 and 60 years per 1000 population 
+6. **Infant deaths**: numerical - Number of Infant Deaths per 1000 population 
+7. **Alcohol**: numerical - Alcohol, recorded per capita (15+) consumption (in litres of pure alcohol)
+8. **Percentage expenditure**: numerical - Expenditure on health as a percentage of Gross Domestic Product per capita (%)
+9. **Hepatitis B**: numerical - Hepatitis B (HepB) immunization coverage among 1-year-olds (%)
+10. **Measles**: numerical - Number of reported cases per 1000 population
+11. **BMI**: numerical - Average Body Mass Index of entire population
+12. **Under-five deaths**: numerical - Number of under-five deaths per 1,000 population
+13. **Polio**: Polio (Pol3) immunization coverage among 1-year-olds (%)
+14. **Total expenditure**: numerical - General government expenditure on health as a percentage of total government expenditure (%)
+15. **Diphtheria**: numerical - Diphtheria tetanus toxoid and pertussis (DTP3) immunization coverage among 1-year-olds (%)
+16. **HIV/AIDS**: numerical - Deaths per 1 000 live births HIV/AIDS (0-4 years)
+17. **GDP**: numerical - Gross Domestic Product per capita (in USD)
+18. **Population**: numerical - Population of the country
+19. **Thinness 1-19 years**: numerical - Prevalence of thinness among children and adolescents for Age 10 to 19 (%)
+20. **Thinness 5-9 years**: numerical - Prevalence of thinness among children for Age 5 to 9 (%)
+21. **Income composition of resources**: numerical - Human Development Index in terms of income composition of resources (index ranging from 0 to 1)
+22. **Schooling**: numerical - Number of years of Schooling
+
+### **2. Data wrangling**
+
+1. Change the ```Year``` variable into a categorical variable
+
+```{r}
+led_dataset <- within(led_dataset, {
+  Year_cat <- NA # Initialize a new variable
+  Year_cat[Year == 2000] <- "2000"
+  Year_cat[Year == 2001] <- "2001"
+  Year_cat[Year == 2002] <- "2002"
+  Year_cat[Year == 2003] <- "2003"
+  Year_cat[Year == 2004] <- "2004"
+  Year_cat[Year == 2005] <- "2005"
+  Year_cat[Year == 2006] <- "2006"
+  Year_cat[Year == 2007] <- "2007"
+  Year_cat[Year == 2008] <- "2008"
+  Year_cat[Year == 2009] <- "2009"
+  Year_cat[Year == 2010] <- "2010"
+  Year_cat[Year == 2011] <- "2011"
+  Year_cat[Year == 2012] <- "2012"
+  Year_cat[Year == 2013] <- "2013"
+  Year_cat[Year == 2014] <- "2014"
+  Year_cat[Year == 2015] <- "2015"
+})
+```
+
+Drop the numerical Year variable column
+
+```{r}
+led_dataset <- subset(led_dataset, select = -Year)
+```
+
+Convert the categorical variable ```Year_cat``` from character to factor
+
+```{r}
+led_dataset$Year_cat <- factor(led_dataset$Year_cat, levels = c("2015", "2014", "2013", "2012", "2011", "2010", "2009", "2008", "2007", "2006", "2005", "2004", "2003", "2002", "2001", "2000"))
+  
+summary(led_dataset$Year_cat)
+```
+
+Convert the categorical variable ```Status``` from character to factor and summarize the count for each level in a table:
+
+```{r}
+led_dataset$Status <- factor(led_dataset$Status, levels = c("Developing", "Developed"))
+  
+summary(led_dataset$Status)
+```
+
+View dataset after changing the columns' type
+
+```{r}
+led_dataset %>%
+  head()
+```
+
+
+### **3. Graphical and numerical summaries**
+
+**3.1. Life expectancy**
+
+This is the response variable I am looking into in the dataset. I want to find out what is the "normal" longevity in the recorded entries, and whether there are extreme cases.
+
+```{r}
+led_dataset %>%
+  filter(Year_cat=="2015") %>%
+  ggplot() + 
+  geom_histogram(
+    aes(x= `Life expectancy`)
+  )
+```
+
+From the histogram, I can see there is a slight skew to the left, and the most common life expectancy is around 72 - 75 years. There are also cases in which life expectancy is below 40, which may need further exploration. 
+
+**3.2. Alcohol**
+
+This is one of the predictor variables I am looking into. This variable is the consumption (in litres of pure alcohol) per capita (15+ years of age and over) per year.
+
+```{r}
+led_dataset %>%
+  ggplot() + 
+  geom_boxplot(
+    aes(y= Alcohol)
+  )
+```
+
+50% of the recorded alcohol consumption amount is below 3.75 litres, 75% of data is below $\approx$ 7.6 litres per capita per year. The highest consumption amount is around 18 litres. 
+
+I want to understand if the higher consumption amount are found in Developed, or Developing countries. To compare and contrast the alcohol consumption among 2 groups, I plot a side-by-side box-plot as follow:
+
+```{r}
+led_dataset %>%
+  ggplot() + 
+  geom_boxplot(
+    aes(y= Alcohol, x = Status)
+  )
+```
+
+It seems like although the middle 50% of developed countries consume more than the middle 50% of the developing ones, developing countries in fact recorded more extreme outliers than developed ones. Although it may be outside the scope of this dataset, I want to find out if there is enough evidence supporting the notion that poverty is correlated to alcoholism.
+
+**3.3. Income composition of resources**
+
+This is one of the predictor variables I am looking into. This is the Human Development Index (HDI) in terms of income composition of resources (index ranging from 0 to 1). 
+
+```{r}
+led_dataset %>%
+  ggplot() + 
+  geom_histogram(
+    aes(x= `Income composition of resources`, fill=Status)
+  )
+```
+
+This plot shows that the majority of developing countries in the 2000-2015 time period spend greater than 25% of total income on resources including health. Most developed countries have population that can afford above 75% of total income on resources. However, there are also around 125 cases of developing countries where the income composition of resources is 0%.
+
+### **4. Explore relationships between variables**
+
+1. Relationship between ```Income composition of resources``` and ```Life expectancy```
+
+```{r}
+led_dataset %>%
+  ggplot(aes(y = `Life expectancy`, x = `Income composition of resources`)) +
+  geom_point()  # the + is telling R there's more to come!
+```
+
+Note:
+
+There is a strong positive linear relationship between income position of resources and life expectancy, which is similar to what I expected. 
+
+I want to find the factors that may be positively associated with life expectancy, and compared to the overall GDP recorded, I find that the amount that people spent on resources plays a more vital role than their income. Since people with lower income may choose to devote more resources to health, schooling, etc., I think it is reasonable to explore this variable in conjunction with life expectancy. 
+
+2. Relationship between ```Alcohol``` and ```Life expectancy```
+
+```{r}
+led_dataset %>%
+  ggplot(aes(y = `Life expectancy`, x = Alcohol)) +
+  geom_point() + # the + is telling R there's more to come!
+  geom_smooth(method = 'lm', se = FALSE)
+```
+
+Note:
+
+There is a positive linear relationship between life expectancy and alcohol consumption, which I initially did not expect. Alcohol is commonly associated with heart stroke or other related cardiovascular diseases, so I am curious about the other variables that may be possible confounding variables to this relationship—or does the data actually suggest that drinking more alcohol increases longevity? 
+
+2. Relationship between country's ```Status``` and ```Life expectancy```
+
+```{r}
+led_dataset %>%
+  ggplot() + 
+  geom_boxplot(
+    aes(x= `Life expectancy`, y = Status)
+  )
+```
+Notes:
+
+- Developing countries have a wider spread of life expectancy values compared to developed ones. This is reasonable since there are 2426 cases in the Developing category, whereas there are only 512 in the Developed one. 
+
+- Developed countries also have larger median life expectancy, and the middle 50% of these countries have higher life expectancy than over 75% of the developing countries. 
+
+- There are several outliers in the Developing category, in which the values are below 45 years.
